@@ -24,7 +24,7 @@ public class SyntaxAnalyzer {
 		{
 			NextToken = lex.getNextToken();
 			
-			if(D())
+			if(this.D())
 			{
 				if(NextToken.equals("begin"))
 				{
@@ -39,30 +39,101 @@ public class SyntaxAnalyzer {
 						}
 						else
 						{
-							System.err.println("Expected: {end.} Got: " + NextToken);
+							System.err.println("Expected: {'end.'} Got: " + NextToken);
 							return false;
 						}
 					}
 					else
 					{
-						System.err.println("Expected: {do, (, assign, unless, when, end, ;} Got: " + NextToken);
+						//System.err.println("Expected: {'do' '(' 'assign' 'unless' 'when' 'end.' ';'} Got: " + NextToken);
 						return false;
 					}
 				
 				}
 				else
 				{
-					System.err.println("Expected: {begin} Got: " + NextToken);
+					System.err.println("Expected: {'begin'} Got: " + NextToken);
 					return false;
 				}
 			}
 			else
 			{
-				System.err.println("Expected: {id, begin} Got: " + NextToken);
+				//System.err.println("Expected: {'id' ',' 'begin'} Got: " + NextToken);
 				return false;
 			}
 		}
+		else
+		{
+			System.err.println("Expected: {'program'} Got: " + NextToken);
+			return false; 
+		}
 	}
 	
+	private boolean D()
+	{
+		if(NextToken.equals("begin"))
+		{
+			return true;
+		}
+		else if(this.IL())
+		{
+			if(NextToken.equals(":"))
+			{
+				NextToken = lex.getNextToken();
+				if(this.D1())
+				{
+					return true;
+				}
+				else
+				{
+					//System.err.println("Expected{'array' 'integer'} Got: " + NextToken);
+					return false;
+				}
+			}
+			else
+			{
+				System.err.println("Expected {':'} Got: " + NextToken);
+				return false;
+			}
+		}
+		else
+		{
+			System.err.println("Expected {'id' ',' 'begin'} Got: " + NextToken);
+			return false;
+		}
+		
+	}
 
+	private boolean D1()
+	{
+		if(this.AR())
+		{
+			if(this.D())
+			{
+				return true;
+			}
+			else
+			{
+				//System.err.println("Expected{'id' ',' 'begin'} Got: " + NextToken);
+				return false;
+			}
+		}
+		else if(NextToken.equals("integer"))
+		{
+			if(this.D())
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}	
+		else
+		{	
+			System.err.println("Expected{'array' 'integer'} Got: " + NextToken);
+			return false;
+		}
+		
+	}
 }
