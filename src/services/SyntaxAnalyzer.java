@@ -1,7 +1,6 @@
 package services;
 
-import java.io.InputStreamReader;
-
+import java.io.BufferedReader;
 import services.LexicalAnalyzer;
 
 public class SyntaxAnalyzer {
@@ -11,11 +10,12 @@ public class SyntaxAnalyzer {
 	private int Subscript; 
 	
 	
-	public SyntaxAnalyzer(InputStreamReader reader)
+	public SyntaxAnalyzer(BufferedReader reader)
 	{
 		lex = new LexicalAnalyzer(reader);
 		NextToken = lex.getNextToken();
 	}
+	
 	
 	
 	public boolean P()
@@ -39,7 +39,7 @@ public class SyntaxAnalyzer {
 						}
 						else
 						{
-							System.err.println("Expected: {'end.'} Got: " + NextToken);
+							System.err.println("Expected: {'end.'} Got: " + NextToken + " @ line: " + lex.getLine());
 							return false;
 						}
 					}
@@ -51,7 +51,7 @@ public class SyntaxAnalyzer {
 				}
 				else
 				{
-					System.err.println("Expected: {'begin'} Got: " + NextToken);
+					System.err.println("Expected: {'begin'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -62,17 +62,13 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'program'} Got: " + NextToken);
+			System.err.println("Expected: {'program'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false; 
 		}
 	}
 	
 	private boolean D()
-	{
-		if(NextToken.equals("begin"))
-		{
-			return true;
-		}
+	{	
 		if(this.IL())
 		{
 			if(NextToken.equals(":"))
@@ -89,12 +85,17 @@ public class SyntaxAnalyzer {
 			}
 			else
 			{
-				System.err.println("Expected {':'} Got: " + NextToken);
+				System.err.println("Expected {':'} Got: " + NextToken + " @ line: " + lex.getLine());
 				return false;
 			}
 		}
+		else if(NextToken.equals("begin"))
+		{
+			return true;
+		}
 		else
 		{
+			System.err.println("Expected: {'begin'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 		
@@ -115,6 +116,7 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals("integer"))
 		{
+			NextToken = lex.getNextToken();
 			if(this.D())
 			{
 				return true;
@@ -126,7 +128,7 @@ public class SyntaxAnalyzer {
 		}	
 		else
 		{	
-			System.err.println("Expected{'integer'} Got: " + NextToken);
+			System.err.println("Expected{'integer'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 		
@@ -148,7 +150,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'array'} Got: " + NextToken);
+			System.err.println("Expected: {'array'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -163,11 +165,12 @@ public class SyntaxAnalyzer {
 			{
 				if(NextToken.equals(")"))
 				{
+					NextToken = lex.getNextToken();
 					return true;
 				}
 				else
 				{
-					System.err.println("Expected: {')'} Got: " + NextToken);
+					System.err.println("Expected: {')'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -182,7 +185,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: { '(' 'id' 'begin' ',' ':' ')' } Got: " + NextToken);
+			System.err.println("Expected: { '(' 'id' 'begin' ',' ':' ')' } Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -225,7 +228,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {':' ')' ','} Got: " + NextToken);
+			System.err.println("Expected: {':' ')' ','} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -246,7 +249,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("InvalidIdentifierException: Expected: {'id'} Got: " + NextToken);
+			System.err.println("InvalidIdentifierException: Expected: {'id'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -260,11 +263,12 @@ public class SyntaxAnalyzer {
 			{
 				if(NextToken.equals(")"))
 				{
+					NextToken = lex.getNextToken();
 					return true;
 				}
 				else
 				{
-					System.err.println("Expected: {')'} Got: " + NextToken);
+					System.err.println("Expected: {')'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -279,7 +283,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'(' 'id' ',' ':' ';' ')'} Got: " + NextToken);
+			System.err.println("Expected: {'(' 'id' ',' ':' ';' ')'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -312,11 +316,12 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals(")"))
 		{
+			NextToken = lex.getNextToken();
 			return true;
 		}
 		else
 		{
-			System.err.println("Expected: {'cons' 'id' ',' ')'} Got: " + NextToken);
+			System.err.println("Expected: {'cons' 'id' ',' ')'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 		
@@ -338,7 +343,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'cons' 'id'} Got: " + NextToken);
+			System.err.println("Expected: {'cons' 'id'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -383,7 +388,7 @@ public class SyntaxAnalyzer {
 				}
 				else
 				{
-					System.err.println("Expected: {')'} Got: " + NextToken);
+					System.err.println("Expected: {')'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -416,7 +421,7 @@ public class SyntaxAnalyzer {
 						}
 						else
 						{
-							System.err.println("Expected: {';'} Got: " + NextToken);
+							System.err.println("Expected: {';'} Got: " + NextToken + " @ line: " + lex.getLine());
 							return false;
 						}
 					}
@@ -427,7 +432,7 @@ public class SyntaxAnalyzer {
 				}
 				else
 				{
-					System.err.println("Expected: {'to'} Got: " + NextToken);
+					System.err.println("Expected: {'to'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -436,13 +441,13 @@ public class SyntaxAnalyzer {
 				return false;
 			}
 		}
-		else if(NextToken.equals("unless") || NextToken.equals("when") || NextToken.equals("end") || NextToken.equals(";"))
+		else if(NextToken.equals("unless") || NextToken.equals("when") || NextToken.equals("end.") || NextToken.equals(";"))
 		{
 			return true;
 		}
 		else
 		{
-			System.err.println("Expected: {'do' '(' 'assign' 'unless' 'when' 'end' ';'} Got: " + NextToken);
+			System.err.println("Expected: {'do' '(' 'assign' 'unless' 'when' 'end.' ';'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 
@@ -469,7 +474,7 @@ public class SyntaxAnalyzer {
 				}
 				else
 				{
-					System.err.println("Expected: {';'} Got: " + NextToken);
+					System.err.println("Expected: {';'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -499,7 +504,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'unless' 'when'} Got: " + NextToken);
+			System.err.println("Expected: {'unless' 'when'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -511,6 +516,7 @@ public class SyntaxAnalyzer {
 			NextToken = lex.getNextToken();
 			if(NextToken.equals(";"))
 			{
+				NextToken = lex.getNextToken();
 				if(this.S())
 				{
 					return true;
@@ -522,13 +528,13 @@ public class SyntaxAnalyzer {
 			}
 			else
 			{
-				System.err.println("Expected: {';'} Got: " + NextToken);
+				System.err.println("Expected: {';'} Got: " + NextToken + " @ line: " + lex.getLine());
 				return false;
 			}
 		}
 		else
 		{
-			System.err.println("Expected: {'in' 'out'} Got: " + NextToken);
+			System.err.println("Expected: {'in' 'out'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -566,7 +572,7 @@ public class SyntaxAnalyzer {
 				}
 				else
 				{
-					System.err.println("Expected: {';'} Got: " + NextToken);
+					System.err.println("Expected: {';'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
@@ -577,7 +583,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {';' 'else'} Got: " + NextToken);
+			System.err.println("Expected: {';' 'else'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -586,10 +592,12 @@ public class SyntaxAnalyzer {
 	{
 		if(lex.isIdentifier(NextToken) || lex.isConstant(NextToken))
 		{
+			NextToken = lex.getNextToken();
 			return true;
 		}
 		else if(NextToken.equals("+") || NextToken.equals("-") || NextToken.equals("*") || NextToken.equals("/"))
 		{
+			NextToken = lex.getNextToken();
 			if(this.E())
 			{
 				if(this.E())
@@ -608,7 +616,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'id' 'cons' '+' '-' '*' '/'} Got: " + NextToken);
+			System.err.println("Expected: {'id' 'cons' '+' '-' '*' '/'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
@@ -667,7 +675,7 @@ public class SyntaxAnalyzer {
 		}
 		else
 		{
-			System.err.println("Expected: {'<' '>' '=' 'and' 'or' 'not'} Got: " + NextToken);
+			System.err.println("Expected: {'<' '>' '=' 'and' 'or' 'not'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
 	}
