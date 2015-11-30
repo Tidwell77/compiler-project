@@ -108,13 +108,13 @@ public class LexicalAnalyzer{
 		symbolTable.add(new SymbolTableEntry(":", "symbol"));
 		symbolTable.add(new SymbolTableEntry("(", "symbol"));
 		symbolTable.add(new SymbolTableEntry(")", "symbol"));
-		symbolTable.add(new SymbolTableEntry("+", "operator"));
-		symbolTable.add(new SymbolTableEntry("-", "operator"));
-		symbolTable.add(new SymbolTableEntry("*", "operator"));
-		symbolTable.add(new SymbolTableEntry("/", "operator"));
-		symbolTable.add(new SymbolTableEntry("=", "operator"));
-		symbolTable.add(new SymbolTableEntry("<", "operator"));
-		symbolTable.add(new SymbolTableEntry(">", "operator"));
+		symbolTable.add(new SymbolTableEntry("+", "op"));
+		symbolTable.add(new SymbolTableEntry("-", "op"));
+		symbolTable.add(new SymbolTableEntry("*", "op"));
+		symbolTable.add(new SymbolTableEntry("/", "op"));
+		symbolTable.add(new SymbolTableEntry("=", "op"));
+		symbolTable.add(new SymbolTableEntry("<", "op"));
+		symbolTable.add(new SymbolTableEntry(">", "op"));
 		
 	}
 	
@@ -228,17 +228,15 @@ public class LexicalAnalyzer{
 	public String symbolType(String s)
 	{
 		if(this.isOperator(s))
-			return "operator";
+			return "op";
 		if(this.isIdentifier(s))
-			return "identifier";
+			return "id";
 		if(this.isKeyWord(s))
 			return "keyword";
 		if(this.isSymbol(s))
 			return "symbol";
 		if(this.isConstant(s))
-			return "constant";
-		if(this.isIdentifier(s))
-			return "identifier";
+			return "cons";
 		
 		return "Not a valid Token";
 	}
@@ -284,5 +282,13 @@ public class LexicalAnalyzer{
 	{
 		return this.line;
 	}
+	
+	public void printSymbolTable()
+	{
+		System.out.println("|\t\tsubscript\t|\t\tsymbol\t\t|\t\ttoken type\t|\t\tmemory location\t\t|");
+		for(int i = 0; i < this.symbolTable.size(); i++)
+		{
+			System.out.println("|\t\t"+i+"\t\t|\t\t"+symbolTable.get(i).getToken()+"\t\t|\t\t"+symbolTable.get(i).getTokenType()+"\t\t|\t\t"+symbolTable.get(i).getMemLocation()+"\t\t|");
+		}
+	}
 }
-

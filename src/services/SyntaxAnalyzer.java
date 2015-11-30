@@ -7,7 +7,7 @@ public class SyntaxAnalyzer {
 	
 	private LexicalAnalyzer lex;
 	private String NextToken;
-	private int Subscript; 
+	//private int Subscript; 
 	
 	
 	public SyntaxAnalyzer(BufferedReader reader)
@@ -16,9 +16,14 @@ public class SyntaxAnalyzer {
 		NextToken = lex.getNextToken();
 	}
 	
+	public LexicalAnalyzer getLex()
+	{
+		return lex;
+	}
+
 	
 	
-	public boolean P()
+ 	public boolean P()
 	{
 		if(NextToken.equals("program"))
 		{

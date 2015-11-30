@@ -15,7 +15,6 @@ public class App {
 	{
 		int bufferSize = 10240; // 10KB.
 		BufferedReader in = null;
-		//InputStreamReader in = null;
 		Boolean success;
 		try 
 		{
@@ -39,6 +38,8 @@ public class App {
 		{
 			System.out.println("\nCompilation Failed");
 		}
+		
+		compiler.getLex().printSymbolTable();
 
 	}
 
