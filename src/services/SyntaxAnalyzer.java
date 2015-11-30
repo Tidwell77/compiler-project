@@ -69,7 +69,11 @@ public class SyntaxAnalyzer {
 	
 	private boolean D()
 	{	
-		if(this.IL())
+		if(NextToken.equals("begin"))
+		{
+			return true;
+		}
+		else if(this.IL())
 		{
 			if(NextToken.equals(":"))
 			{
@@ -89,10 +93,7 @@ public class SyntaxAnalyzer {
 				return false;
 			}
 		}
-		else if(NextToken.equals("begin"))
-		{
-			return true;
-		}
+		
 		else
 		{
 			System.err.println("Expected: {'begin'} Got: " + NextToken + " @ line: " + lex.getLine());
@@ -103,11 +104,19 @@ public class SyntaxAnalyzer {
 
 	private boolean D1()
 	{
-		if(this.AR())
+		//Check Selection Set of AR() first
+		if(NextToken.equals("array"))
 		{
-			if(this.D())
+			if(this.AR())
 			{
-				return true;
+				if(this.D())
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 			else
 			{
@@ -131,6 +140,7 @@ public class SyntaxAnalyzer {
 			System.err.println("Expected{'integer'} Got: " + NextToken + " @ line: " + lex.getLine());
 			return false;
 		}
+		
 		
 	}
 
@@ -192,18 +202,7 @@ public class SyntaxAnalyzer {
 
 	private boolean IL()
 	{
-		if(this.ID())
-		{
-			if(this.IL())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if(NextToken.equals(","))
+		if(NextToken.equals(","))
 		{
 			NextToken = lex.getNextToken();
 			if(this.ID())
@@ -225,6 +224,24 @@ public class SyntaxAnalyzer {
 		else if(NextToken.equals(":") || NextToken.equals(")"))
 		{
 			return true;
+		}
+		else if(lex.isIdentifier(NextToken))
+		{
+			if(this.ID())
+			{
+				if(this.IL())
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
 		}
 		else
 		{
@@ -289,7 +306,7 @@ public class SyntaxAnalyzer {
 	}
 
 	private boolean SB()
-	{
+	{ 
 		if(lex.isConstant(NextToken) || lex.isIdentifier(NextToken))
 		{
 			NextToken = lex.getNextToken();
@@ -316,7 +333,6 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals(")"))
 		{
-			NextToken = lex.getNextToken();
 			return true;
 		}
 		else

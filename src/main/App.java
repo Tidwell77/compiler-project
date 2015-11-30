@@ -16,9 +16,9 @@ public class App {
 		int bufferSize = 10240; // 10KB.
 		BufferedReader in = null;
 		//InputStreamReader in = null;
+		Boolean success;
 		try 
 		{
-			//in = new InputStreamReader(new FileInputStream("./program.txt"));
 			in = new BufferedReader(new InputStreamReader(new FileInputStream("./program.txt"), "UTF-8"), bufferSize);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -27,63 +27,18 @@ public class App {
 		SyntaxAnalyzer compiler = new SyntaxAnalyzer(in);
 		
 		if(compiler.P())
-			System.out.println("Compiled Successfully");
+			success = true;
 		else
-			System.out.println("You Got BUGS!!!!!");
+			success = false;
 		
-		
-//		LexicalAnalyzer lex = new LexicalAnalyzer(in);
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());	
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());	
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());	
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		System.out.println(lex.getNextToken());
-//		
+		if(success)
+		{
+			System.out.println("Compiled Successfully");
+		}
+		else
+		{
+			System.out.println("\nCompilation Failed");
+		}
 
 	}
 
