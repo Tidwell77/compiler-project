@@ -32,15 +32,25 @@ public class App {
 		
 		if(success)
 		{
-			System.out.println("Compiled Successfully");
+			System.out.println("\n\n");
+			System.out.println("|===============================================================================================================================|");
+			System.out.println("|----------------------------------------------------Compiled Successfully------------------------------------------------------|");
+			System.out.println("|===============================================================================================================================|");
+			System.out.println("\n\n\n");
+			
+			compiler.getLex().printSymbolTable();
+			System.out.println("\n\n\n");
+			compiler.printQuadTable();
 		}
 		else
 		{
-			System.out.println("\nCompilation Failed");
+			System.out.println("\n");
+			System.out.println("|===============================================================================================================================|");
+			System.out.println("|-----------------------------------------------------Compilation Failed--------------------------------------------------------|");
+			System.out.println("|===============================================================================================================================|");
 		}
 		
-		compiler.getLex().printSymbolTable();
-
 	}
 
 }
+

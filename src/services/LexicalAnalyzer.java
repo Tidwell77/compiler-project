@@ -132,6 +132,22 @@ public class LexicalAnalyzer{
 					this.line++;
 				nextSymbol = (char) reader.read();
 			}
+			//skip over any comments (denoted by #)
+			if(nextSymbol == '#')
+			{
+				while(nextSymbol != '\n')
+				{
+					nextSymbol = (char) reader.read();
+				}
+				
+				//skip over any leading whitespace
+				while((Character.isWhitespace(nextSymbol) || Character.isSpaceChar(nextSymbol)) && reader.ready())
+				{
+					if(nextSymbol == '\n')
+						this.line++;
+					nextSymbol = (char) reader.read();
+				}
+			}
 			//Case 1: first encountered character is a letter
 			if(Character.isJavaIdentifierStart(nextSymbol))
 			{
@@ -283,12 +299,27 @@ public class LexicalAnalyzer{
 		return this.line;
 	}
 	
+	public int getSymbolSubscript(String symbol)
+	{
+		for(int i = 0; i < symbolTable.size(); i++)
+		{
+			if(symbolTable.get(i).getToken().equals(symbol))
+				return i;
+		}
+		return 0;
+	}
+	
 	public void printSymbolTable()
 	{
-		System.out.println("|\t\tsubscript\t|\t\tsymbol\t\t|\t\ttoken type\t|\t\tmemory location\t\t|");
+		System.out.println("|===============================================================================================================================|");
+		System.out.println("|--------------------------------------------------------SYMBOL TABLE-----------------------------------------------------------|");
+		System.out.println("|===============================================================================================================================|");
+		System.out.println("|\t\tsubscript\t|\t\tsymbol\t\t|\t\ttoken type\t|\t\tmemory location\t|");
+		System.out.println("|-------------------------------------------------------------------------------------------------------------------------------|");
 		for(int i = 0; i < this.symbolTable.size(); i++)
 		{
 			System.out.println("|\t\t"+i+"\t\t|\t\t"+symbolTable.get(i).getToken()+"\t\t|\t\t"+symbolTable.get(i).getTokenType()+"\t\t|\t\t"+symbolTable.get(i).getMemLocation()+"\t\t|");
 		}
+		System.out.println("|-------------------------------------------------------------------------------------------------------------------------------|");
 	}
 }

@@ -4,13 +4,14 @@ public class SymbolTableEntry {
 	
 	String token;
 	String tokenType;
-	int memLocation;
+	String memLocation;
 	
 	
 	public SymbolTableEntry(String token, String tokenType)
 	{
 		this.token = token;
 		this.tokenType = tokenType;
+		this.memLocation = "---";
 	}
 	
 	public String getToken() {
@@ -25,14 +26,16 @@ public class SymbolTableEntry {
 	public void setTokenType(String tokenType) {
 		this.tokenType = tokenType;
 	}
-	public int getMemLocation() {
+	public String getMemLocation() {
 		return memLocation;
 	}
-	public void setMemLocation(int memLocation) {
+	public void setMemLocation(String memLocation) {
 		this.memLocation = memLocation;
 	}
 	
 	
 
 }
+
+
 

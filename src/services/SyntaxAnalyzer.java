@@ -1,14 +1,21 @@
 package services;
 
 import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.Stack;
+
+import model.Quad;
+import model.SymbolTableEntry;
 import services.LexicalAnalyzer;
 
 public class SyntaxAnalyzer {
 	
 	private LexicalAnalyzer lex;
 	private String NextToken;
-	//private int Subscript; 
-	
+	private int Subscript; 
+	private Stack<String> SAS = new Stack<String>();
+	private ArrayList<Quad> QuadTable = new ArrayList<Quad>();
+	private int varCount = 0; // used for genTemp();
 	
 	public SyntaxAnalyzer(BufferedReader reader)
 	{
@@ -20,9 +27,41 @@ public class SyntaxAnalyzer {
 	{
 		return lex;
 	}
+	
 
+	public void genQuad(String action, String op1, String op2, String result)
+	{
+		Quad newQuad = new Quad(action, op1, op2, result);
+		QuadTable.add(newQuad);
+		
+	}
 	
+	public String getNextQuad()
+	{
+		return Integer.toString(QuadTable.size() -1);
+	}
 	
+	public String genTemp(String tokenType)
+	{
+		String varName = "t" + varCount++;
+		SymbolTableEntry newEntry = new SymbolTableEntry(varName, tokenType);
+		lex.symbolTable.add(newEntry);
+		return varName;
+	}
+	
+	public void printQuadTable()
+	{
+		System.out.println("|=======================================================================================================================================================|");
+		System.out.println("|---------------------------------------------------------------------------QUAD TABLE------------------------------------------------------------------|");
+		System.out.println("|=======================================================================================================================================================|");
+		System.out.println("|\t\tsubscript\t|\t\taction\t\t|\t\top1\t\t|\t\top2\t\t|\tresult\t\t|");
+		System.out.println("|-------------------------------------------------------------------------------------------------------------------------------------------------------|");
+		for(int i = 0; i < this.QuadTable.size(); i++)
+		{
+			System.out.println("|\t\t"+i+"\t\t|\t\t"+QuadTable.get(i).getAction()+"\t\t|\t\t"+QuadTable.get(i).getOp1()+"\t\t|\t\t"+QuadTable.get(i).getOp2()+"\t\t|\t" + QuadTable.get(i).getResult() + "\t\t|");
+		}
+		System.out.println("|-------------------------------------------------------------------------------------------------------------------------------------------------------|");
+	}
  	public boolean P()
 	{
 		if(NextToken.equals("program"))
@@ -78,23 +117,34 @@ public class SyntaxAnalyzer {
 		{
 			return true;
 		}
-		else if(this.IL())
+		else if(!NextToken.equals("begin") && (NextToken.equals(",") || lex.isIdentifier(NextToken) || NextToken.equals(":") || NextToken.equals(")")))
 		{
-			if(NextToken.equals(":"))
+			//Semantic Action
+			//---------------------------
+			SAS.push("#");
+			//---------------------------
+			if(this.IL())
 			{
-				NextToken = lex.getNextToken();
-				if(this.D1())
+				if(NextToken.equals(":"))
 				{
-					return true;
+					NextToken = lex.getNextToken();
+					if(this.D1())
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 				else
 				{
+					System.err.println("Expected {':'} Got: " + NextToken + " @ line: " + lex.getLine());
 					return false;
 				}
 			}
 			else
 			{
-				System.err.println("Expected {':'} Got: " + NextToken + " @ line: " + lex.getLine());
 				return false;
 			}
 		}
@@ -130,6 +180,17 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals("integer"))
 		{
+			//Semantic Action
+			//---------------------------------
+			while(SAS.peek() != "#")
+			{
+				String x = SAS.pop();
+				Subscript = lex.getSymbolSubscript(x);
+				lex.symbolTable.get(Subscript).setTokenType("integer");
+				
+			}
+			SAS.pop();
+			//---------------------------------
 			NextToken = lex.getNextToken();
 			if(this.D())
 			{
@@ -153,6 +214,16 @@ public class SyntaxAnalyzer {
 	{
 		if(NextToken.equals("array"))
 		{
+			//Semantic Action
+			//---------------------------------
+			while(SAS.peek() != "#")
+			{
+				String x = SAS.pop();
+				Subscript = lex.getSymbolSubscript(x);
+				lex.symbolTable.get(Subscript).setTokenType("array");
+				
+			}
+			//---------------------------------
 			NextToken = lex.getNextToken();
 			if(this.AR1())
 			{
@@ -259,6 +330,11 @@ public class SyntaxAnalyzer {
 	{
 		if(lex.isIdentifier(NextToken))
 		{
+			//Semantic Action
+			//----------------------
+			SAS.push(NextToken);
+			//----------------------
+			
 			NextToken = lex.getNextToken();
 			if(this.ID1())
 			{
@@ -314,6 +390,11 @@ public class SyntaxAnalyzer {
 	{ 
 		if(lex.isConstant(NextToken) || lex.isIdentifier(NextToken))
 		{
+			//Semantic Action
+			//-----------------------
+			SAS.push(NextToken);
+			//-----------------------
+			
 			NextToken = lex.getNextToken();
 			if(this.SB())
 			{
@@ -352,6 +433,10 @@ public class SyntaxAnalyzer {
 	{
 		if(lex.isConstant(NextToken) || lex.isIdentifier(NextToken))
 		{
+			//Semantic Action
+			//-----------------------
+			SAS.push(NextToken);
+			//-----------------------
 			NextToken = lex.getNextToken();
 			if(this.SB())
 			{
@@ -373,6 +458,11 @@ public class SyntaxAnalyzer {
 	{
 		if(NextToken.equals("do"))
 		{
+			//Semantic Action
+			//-----------------------------
+			genQuad("jmp","---","---","---");
+			SAS.push(getNextQuad());
+			//-----------------------------
 			NextToken = lex.getNextToken();
 			if(this.S())
 			{
@@ -420,14 +510,27 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals("assign"))
 		{
+			//Semantic Action
+			//-----------------------
+			String op = ":=";
+			//-----------------------
 			NextToken = lex.getNextToken();
 			if(this.E())
 			{
+				//Semantic Action
+				//-----------------------
+				String x = SAS.pop();
+				//-----------------------
 				if(NextToken.equals("to"))
 				{
 					NextToken = lex.getNextToken();
 					if(this.ID())
 					{
+						//Semantic Action
+						//-----------------------
+						String y = SAS.pop();
+						genQuad(op,x,"---",y);
+						//-----------------------
 						if(NextToken.equals(";"))
 						{
 							NextToken = lex.getNextToken();
@@ -478,9 +581,21 @@ public class SyntaxAnalyzer {
 	{
 		if(NextToken.equals("unless"))
 		{
+			
 			NextToken = lex.getNextToken();
 			if(this.C())
 			{
+				//Semantic Action
+				//--------------------------
+				String x = SAS.pop(); // temp generated by C Boolean for condition
+				String y = SAS.pop(); // NextQuad variable to jump back to
+				int loopStart = Integer.parseInt(y) +1;
+				genQuad("jfalse",x,"---", Integer.toString(loopStart)); 
+				
+				// update quad table 
+				int quadUpdate = Integer.parseInt(getNextQuad()) - 1;
+				QuadTable.get(Integer.parseInt(y)).setResult(Integer.toString(quadUpdate));
+				//--------------------------
 				if(NextToken.equals(";"))
 				{
 					NextToken = lex.getNextToken();
@@ -509,6 +624,24 @@ public class SyntaxAnalyzer {
 			NextToken = lex.getNextToken();
 			if(this.C())
 			{
+				//Semantic Action
+				//--------------------------
+				String x = SAS.pop(); // temp generated by C Boolean for condition
+				String y = SAS.pop(); // NextQuad variable to jump back to
+				int ifAction = Integer.parseInt(y) +1;
+				
+				//------------------------
+				Quad newQuad = new Quad("jmp", "---","---","---");
+				int addIndex = QuadTable.size() - 1;
+				QuadTable.add(addIndex, newQuad);
+				SAS.push(Integer.toString(addIndex)); // pushing next quad to know where to update quad table.
+				//------------------------
+				genQuad("jtrue",x,"---", Integer.toString(ifAction)); 
+				
+				// update quad table 
+				int quadUpdate = Integer.parseInt(getNextQuad()) - 1;
+				QuadTable.get(Integer.parseInt(y)).setResult(Integer.toString(quadUpdate));
+				//--------------------------
 				if(this.S3())
 				{
 					return true;
@@ -534,6 +667,12 @@ public class SyntaxAnalyzer {
 	{
 		if(NextToken.equals("in") || NextToken.equals("out"))
 		{
+			//Semantic Action
+			//-----------------------
+			String op = NextToken;
+			String x = SAS.pop();
+			genQuad(op, "---", "---", x);
+			//-----------------------
 			NextToken = lex.getNextToken();
 			if(NextToken.equals(";"))
 			{
@@ -564,6 +703,12 @@ public class SyntaxAnalyzer {
 	{
 		if(NextToken.equals(";"))
 		{
+			//SEMANTIC ACTION
+			//-------------------------------------
+			String x = SAS.pop();
+			int quadUpdate = Integer.parseInt(getNextQuad()) - 1;
+			QuadTable.get(Integer.parseInt(x)).setResult(Integer.toString(quadUpdate));
+			//-------------------------------------
 			NextToken = lex.getNextToken();
 			if(this.S())
 			{
@@ -576,11 +721,18 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals("else"))
 		{
+			
 			NextToken = lex.getNextToken();
 			if(this.S())
 			{
 				if(NextToken.equals(";"))
 				{
+					//SEMANTIC ACTION
+					//--------------------------------
+					String x = SAS.pop();
+					int quadUpdate = Integer.parseInt(getNextQuad()) + 1;
+					QuadTable.get(Integer.parseInt(x)).setResult(Integer.toString(quadUpdate));
+					//--------------------------------
 					NextToken = lex.getNextToken();
 					if(this.S())
 					{
@@ -611,46 +763,93 @@ public class SyntaxAnalyzer {
 
 	private boolean E()
 	{
+		Boolean flag = false;
+		String op = null;
+		Boolean result;
+		
 		if(lex.isIdentifier(NextToken) || lex.isConstant(NextToken))
 		{
+			//Semantic Action
+			//----------------------
+			SAS.push(NextToken);
+			//----------------------
+			
 			NextToken = lex.getNextToken();
 			return true;
 		}
 		else if(NextToken.equals("+") || NextToken.equals("-") || NextToken.equals("*") || NextToken.equals("/"))
 		{
+			//Semantic Action
+			//-----------------------
+			flag = true;
+			op = NextToken;
+			//-----------------------
+			
 			NextToken = lex.getNextToken();
 			if(this.E())
 			{
 				if(this.E())
 				{
-					return true;
+					result = true;
 				}
 				else
 				{
-					return false;
+					result = false;
 				}
 			}
 			else
 			{
-				return false;
+				result = false;
 			}
 		}
 		else
 		{
 			System.err.println("Expected: {'id' 'cons' '+' '-' '*' '/'} Got: " + NextToken + " @ line: " + lex.getLine());
-			return false;
+			result = false;
 		}
+		
+		if(flag && result)
+		{
+			String x = SAS.pop();
+			String y = SAS.pop();
+			int loc = lex.getSymbolSubscript(y);
+			String tempType = lex.symbolTable.get(loc).getTokenType();
+			String z = genTemp(tempType);
+			genQuad(op,x,y,z);
+			SAS.push(z);
+			
+		}
+		return result;
 	}
 
 	private boolean C()
 	{
 		if(NextToken.equals("<") || NextToken.equals(">") || NextToken.equals("="))
 		{
+			//Semantic Action
+			//------------------------------
+			String op = NextToken;
+			//------------------------------
 			NextToken = lex.getNextToken();
 			if(this.E())
 			{
 				if(this.E())
 				{
+					//Semantic Action
+					//---------------------------
+					String x = SAS.pop();
+					String y = SAS.pop();
+					String peek = SAS.peek();
+					String z = genTemp("boolean");
+					genQuad(op,y,x,z);
+					if(peek.equals("not"))
+					{
+						SAS.pop();
+						SAS.push("not " + z);
+					}
+					else
+						SAS.push(z);
+					//---------------------------
 					return true;
 				}
 				else
@@ -665,11 +864,28 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals("and") || NextToken.equals("or"))
 		{
+			//---------------------------
+			String op = NextToken;
+			//---------------------------
 			NextToken = lex.getNextToken();
 			if(this.C())
 			{
 				if(this.C())
 				{
+					//--------------------------
+					String x = SAS.pop();
+					String y = SAS.pop();
+					String peek = SAS.peek();
+					String z = genTemp("boolean");
+					genQuad(op,x,y,z);
+					if(peek.equals("not"))
+					{
+						SAS.pop();
+						SAS.push("not " + z);
+					}
+					else
+						SAS.push(z);
+					//--------------------------
 					return true;
 				}
 				else
@@ -684,6 +900,10 @@ public class SyntaxAnalyzer {
 		}
 		else if(NextToken.equals("not"))
 		{
+			//Symantic Action
+			//--------------------------------------
+			SAS.push("not");
+			//--------------------------------------
 			NextToken = lex.getNextToken();
 			if(this.C())
 			{
